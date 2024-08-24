@@ -8,7 +8,7 @@ use tracing::debug;
 use distribution_types::{Resolution, UnresolvedRequirementSpecification};
 use pep440_rs::{Version, VersionSpecifiers};
 use pypi_types::Requirement;
-use uv_auth::store_credentials_from_url;
+use uv_auth::{store_credentials_from_environment, store_credentials_from_url};
 use uv_cache::Cache;
 use uv_client::{BaseClientBuilder, Connectivity, FlatIndexClient, RegistryClientBuilder};
 use uv_configuration::{Concurrency, ExtrasSpecification, Reinstall, Upgrade};
@@ -428,6 +428,7 @@ pub(crate) async fn resolve_names(
     for url in index_locations.urls() {
         store_credentials_from_url(url);
     }
+    store_credentials_from_environment();
 
     // Initialize the registry client.
     let client = RegistryClientBuilder::new(cache.clone())
@@ -541,6 +542,7 @@ pub(crate) async fn resolve_environment<'a>(
     for url in index_locations.urls() {
         store_credentials_from_url(url);
     }
+    store_credentials_from_environment();
 
     // Initialize the registry client.
     let client = RegistryClientBuilder::new(cache.clone())
@@ -681,6 +683,7 @@ pub(crate) async fn sync_environment(
     for url in index_locations.urls() {
         store_credentials_from_url(url);
     }
+    store_credentials_from_environment();
 
     // Initialize the registry client.
     let client = RegistryClientBuilder::new(cache.clone())
@@ -861,6 +864,7 @@ pub(crate) async fn update_environment(
     for url in index_locations.urls() {
         store_credentials_from_url(url);
     }
+    store_credentials_from_environment();
 
     // Initialize the registry client.
     let client = RegistryClientBuilder::new(cache.clone())
