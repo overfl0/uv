@@ -233,3 +233,75 @@ dependencies listed.
 
 If working in a project composed of many packages, see the [workspaces](./workspaces.md)
 documentation.
+
+## Build isolation
+
+By default, uv builds all packages in isolated virtual environments, as per
+[PEP 517](https://peps.python.org/pep-0517/). Some packages are incompatible with build isolation,
+be it intentionally (e.g., due to the use of heavy build dependencies, mostly commonly PyTorch) or
+unintentionally (e.g., due to the use of legacy packaging setups).
+
+To disable build isolation for a specific dependency, add it to the `no-build-isolation-package`
+list in your `pyproject.toml`:
+
+```toml title="pyproject.toml"
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]
+```
+
+Installing packages without build isolation requires that the package's build dependencies are
+installed in the project environment _prior_ to installing the package itself. This can be achieved
+by separating out the build dependencies and the packages that require them into distinct optional
+groups. For example:
+
+```toml title="pyproject.toml"
+[project]
+name = "project"
+version = "0.1.0"
+description = "..."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+build = ["torch"]
+compile = ["flash-attn"]
+```
+
+Given the above, a user would first sync the build dependencies, followed by the build-requiring
+packages:
+
+```console
+$ uv sync --extra build
+$ uv sync --extra compile
+```
+
+Note that `uv sync --extra compile` would, by default, uninstall the `torch` package. To retain the
+build dependencies, use instead:
+
+````console
+```console
+$ uv sync --extra build
+$ uv sync --extra build --extra compile
+````
+
+Alternatively, build dependencies can be installed out-of-band using the lower-level `uv pip` API.
+For example, given:
+
+```toml title="pyproject.toml"
+[project]
+name = "project"
+version = "0.1.0"
+description = "..."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["flash-attn"]
+```
+
+You could run the following sequence of commands:
+
+```console
+$ uv venv
+$ uv pip install torch
+$ uv sync
+```
