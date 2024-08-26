@@ -424,7 +424,7 @@ jobs:
 
   build-binary-linux:
     runs-on:
-      labels: ubuntu-latest-large
+      labels: ubuntu-latest
     name: "build binary | linux"
     steps:
       - uses: actions/checkout@v4
@@ -493,7 +493,7 @@ jobs:
 
   build-binary-windows:
     runs-on:
-      labels: windows-latest-large
+      labels: windows-latest
     name: "build binary | windows"
     steps:
       - name: Create Dev Drive using ReFS
